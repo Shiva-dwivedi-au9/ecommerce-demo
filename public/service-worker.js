@@ -4,7 +4,18 @@ self.addEventListener('push', function (event) {
     const options = {
         body: "hello",
         icon: '',
-        actions: ''
+        actions: [
+            {
+                action: 'view',
+                title: 'View',
+                icon: 'path/to/icon.png'
+            },
+            {
+                action: 'dismiss',
+                title: 'Dismiss',
+                icon: 'path/to/icon.png'
+            }
+        ]
     };
 
     event.waitUntil(
