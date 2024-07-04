@@ -26,6 +26,11 @@ type Props = {
   product: ProductType;
   className?: string;
 };
+declare global {
+  interface Window {
+    dataLayer: any;
+  }
+}
 
 const ProductCard = ({ product }: Props) => {
   const { addToCart, toggleSaved } = useGlobalContext();

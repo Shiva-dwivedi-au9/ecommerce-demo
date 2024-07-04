@@ -78,7 +78,7 @@ function subscribeUserToPush(swReg: any) {
 function sendSubscriptionToServer(subscription: any) {
   // Add user identification data (e.g., user ID or email)
   const userSubscription = {
-    userId: JSON.parse(localStorage.getItem("insights-profile-id")),
+    userId: JSON.parse(localStorage.getItem("insights-profile-id") || ""),
     subscription: subscription,
   };
   const payload = {
