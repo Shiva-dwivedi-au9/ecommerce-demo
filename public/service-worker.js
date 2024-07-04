@@ -1,10 +1,10 @@
 self.addEventListener('push', function (event) {
     console.log("=======>push happening", event)
-    const data = event.data.json();
+    // const data = event.data.json();
     const options = {
-        body: data.body,
-        icon: data.icon,
-        actions: data.actions
+        body: "hello",
+        icon: '',
+        actions: ''
     };
 
     event.waitUntil(
