@@ -1,0 +1,25 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "service-worker.js",
+        "use": "@vercel/node"
+      },
+      {
+        "src": "register-sw.html",
+        "use": "@vercel/static"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          {
+            "key": "X-Frame-Options",
+            "value": "ALLOWALL"
+          }
+        ]
+      }
+    ]
+  }
+  
