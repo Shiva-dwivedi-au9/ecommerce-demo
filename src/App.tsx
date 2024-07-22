@@ -29,7 +29,12 @@ if ("Notification" in window && "serviceWorker" in navigator) {
     .register("/service-worker.js")
     .then(function (swReg) {
       console.log("======> Service Worker is registered", swReg);
-
+      console.log(
+        "=======>",
+        urlB64ToUint8Array(
+          "BE3_PMZbOi8cAyZHVkNEQ4QfWMh_C_jK9wWzAGWaSvrt3cNURfkYpbuoAQ_NFC5eg6fOkCYk5miAtx0oS85TaygBBw-C7yHtYAfwUHHMD4UJA1ASDwPiXCGjFtWOznu2wZEIZuGmgt-RfZlqFnyLOuOj1jL3e7qs3wuAbmhet0WB6oBERG5cmnn2IN2VOrr6IDfMeFlPnbfy5QeEfg_D5IZ1nqacXwqD3b5LQ2iWGXn5qPU8Hk1-83O1dGTuLABhjaL18BDJaEIQxolpNE3E55NUSYaQPvXQ3xL7zSxRAh-ht4Z8F3sQsOc_KvrexPdhqLRzlJaVNJ9nsNvT15HY6doxzPlo"
+        )
+      );
       Notification.requestPermission().then(function (permission) {
         if (permission === "granted") {
           console.log("Notification permission granted.");
@@ -57,7 +62,7 @@ function urlB64ToUint8Array(base64String: any) {
 
 function subscribeUserToPush(swReg: any) {
   const applicationServerKey = urlB64ToUint8Array(
-    "BKswNer4DeVdbHaan-PxXBiqDs-ONQBx1Fl3Ssa0sX46bvNrqjaZR-L2IqdojuqRGLDaQK7C2_fa91UCuDdmiSY"
+    "BE3_PMZbOi8cAyZHVkNEQ4QfWMh_C_jK9wWzAGWaSvrt3cNURfkYpbuoAQ_NFC5eg6fOkCYk5miAtx0oS85TaygBBw-C7yHtYAfwUHHMD4UJA1ASDwPiXCGjFtWOznu2wZEIZuGmgt-RfZlqFnyLOuOj1jL3e7qs3wuAbmhet0WB6oBERG5cmnn2IN2VOrr6IDfMeFlPnbfy5QeEfg_D5IZ1nqacXwqD3b5LQ2iWGXn5qPU8Hk1-83O1dGTuLABhjaL18BDJaEIQxolpNE3E55NUSYaQPvXQ3xL7zSxRAh-ht4Z8F3sQsOc_KvrexPdhqLRzlJaVNJ9nsNvT15HY6doxzPlo"
   );
   swReg.pushManager
     .subscribe({
