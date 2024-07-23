@@ -30,7 +30,7 @@ if ("Notification" in window && "serviceWorker" in navigator) {
     .then(function (swReg) {
       console.log("======> Service Worker is registered", swReg);
       console.log(
-        "=======>",
+        "=======>consoling service worker",
         urlB64ToUint8Array(
           "BE3_PMZbOi8cAyZHVkNEQ4QfWMh_C_jK9wWzAGWaSvrt3cNURfkYpbuoAQ_NFC5eg6fOkCYk5miAtx0oS85TaygBBw-C7yHtYAfwUHHMD4UJA1ASDwPiXCGjFtWOznu2wZEIZuGmgt-RfZlqFnyLOuOj1jL3e7qs3wuAbmhet0WB6oBERG5cmnn2IN2VOrr6IDfMeFlPnbfy5QeEfg_D5IZ1nqacXwqD3b5LQ2iWGXn5qPU8Hk1-83O1dGTuLABhjaL18BDJaEIQxolpNE3E55NUSYaQPvXQ3xL7zSxRAh-ht4Z8F3sQsOc_KvrexPdhqLRzlJaVNJ9nsNvT15HY6doxzPlo"
         )
