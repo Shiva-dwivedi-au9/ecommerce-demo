@@ -2,8 +2,22 @@
     "version": 2,
     "builds": [
       {
-        "src": "public/**/*",
+        "src": "public/service-worker.js",
+        "use": "@vercel/node"
+      },
+      {
+        "src": "public/register-sw.html",
         "use": "@vercel/static"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/service-worker.js",
+        "dest": "/public/service-worker.js"
+      },
+      {
+        "src": "/register-sw.html",
+        "dest": "/public/register-sw.html"
       }
     ],
     "headers": [
