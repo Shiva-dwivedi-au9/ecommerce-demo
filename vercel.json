@@ -1,5 +1,6 @@
 {
     "version": 2,
+    "public": true,
     "builds": [
       {
         "src": "public/service-worker.js",
@@ -8,16 +9,6 @@
       {
         "src": "public/register-sw.html",
         "use": "@vercel/static"
-      }
-    ],
-    "rewrites": [
-      {
-        "source": "/service-worker.js",
-        "destination": "/public/service-worker.js"
-      },
-      {
-        "source": "/register-sw.html",
-        "destination": "/public/register-sw.html"
       }
     ],
     "headers": [
