@@ -3,21 +3,21 @@
     "builds": [
       {
         "src": "public/service-worker.js",
-        "use": "@vercel/node"
+        "use": "@vercel/static"
       },
       {
         "src": "public/register-sw.html",
         "use": "@vercel/static"
       }
     ],
-    "routes": [
+    "rewrites": [
       {
-        "src": "/service-worker.js",
-        "dest": "/public/service-worker.js"
+        "source": "/service-worker.js",
+        "destination": "/public/service-worker.js"
       },
       {
-        "src": "/register-sw.html",
-        "dest": "/public/register-sw.html"
+        "source": "/register-sw.html",
+        "destination": "/public/register-sw.html"
       }
     ],
     "headers": [
