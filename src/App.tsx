@@ -131,12 +131,14 @@ const App = () => {
     }
     function sendTokenToServer(token: any) {
       // Add user identification data (e.g., user ID or email)
+      const date = new Date();
+
       const userSubscription = {
         profile_id: JSON.parse(
           localStorage.getItem("insights-profile-id") || ""
         ),
         fcm_token: token,
-        timestamp: new Date(),
+        timestamp: Math.floor(date.getTime() / 1000),
         platform: "web",
         domain: window.location.hostname,
       };
