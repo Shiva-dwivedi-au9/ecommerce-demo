@@ -129,6 +129,26 @@ const App = () => {
           console.error("Failed to subscribe the user: ", error);
         });
     }
+    function sendTokenToServer(token: any) {
+      // Add user identification data (e.g., user ID or email)
+      const userSubscription = {
+        profile_id: JSON.parse(
+          localStorage.getItem("insights-profile-id") || ""
+        ),
+        fcm_token: token,
+        timestamp: new Date(),
+        platform: "web",
+        domain: window.location.hostname,
+      };
+
+      return fetch("https://dev-insights-api.rebid.co/v1/app/token", {
+        method: "POST",
+        body: JSON.stringify(userSubscription),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
   }, []);
 
   return (
