@@ -1,9 +1,12 @@
+import React, { useEffect } from "react";
 import loadable from "@loadable/component";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Container from "./components/Container";
 import ProgressLine from "./components/Loading/ProgressLine";
 import { Provider } from "./context/GlobalState";
 import Saved from "./pages/Saved";
+import { initializeApp } from "firebase/app";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const Home = loadable(() => import("./pages/Home"), {
   fallback: <ProgressLine />,
@@ -24,105 +27,114 @@ const Register = loadable(() => import("./pages/Register"), {
   fallback: <ProgressLine />,
 });
 
+const firebaseConfig = {
+  apiKey: "AIzaSyB6-_MaO3hpFt0tD1C5IqeLnpKWpalDTx4",
+  authDomain: "nonprod-64586.firebaseapp.com",
+  projectId: "nonprod-64586",
+  storageBucket: "nonprod-64586.appspot.com",
+  messagingSenderId: "449251706684",
+  appId: "1:449251706684:web:231d21f65d2980501b4039",
+  measurementId: "G-XSSJE9P2TF",
+};
+
 const App = () => {
-  if ("Notification" in window && "serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("/service-worker.js")
-      .then(function (swReg) {
-        console.log("======> Service Worker is registered", swReg);
+  useEffect(() => {
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
 
-        Notification.requestPermission().then(function (permission) {
-          if (permission === "granted") {
-            console.log("Notification permission granted.");
-            subscribeUserToPush(swReg);
-          }
+    if ("Notification" in window && "serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/firebase-messaging-sw.js")
+        .then((registration) => {
+          console.log(
+            "Service Worker registered with scope:",
+            registration.scope
+          );
+
+          Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+              console.log("Notification permission granted.");
+              subscribeUserToPush(registration);
+              console.log("===>register", registration);
+              getToken(messaging, {
+                vapidKey:
+                  "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk",
+                serviceWorkerRegistration: registration,
+              })
+                .then((currentToken) => {
+                  if (currentToken) {
+                    console.log("FCM Token:", currentToken);
+                    // Send the token to your server and update the UI if necessary
+                    sendTokenToServer(currentToken);
+                  } else {
+                    console.log(
+                      "No registration token available. Request permission to generate one."
+                    );
+                  }
+                })
+                .catch((err) => {
+                  console.error(
+                    "An error occurred while retrieving token. ",
+                    err
+                  );
+                });
+            }
+          });
+        })
+        .catch((error) => {
+          console.error("Service Worker Error", error);
         });
-      })
-      .catch(function (error) {
-        console.error("Service Worker Error", error);
-      });
-  }
 
-  function urlB64ToUint8Array(base64String: any) {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding)
-      .replace(/\-/g, "+")
-      .replace(/_/g, "/");
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
+      onMessage(messaging, (payload) => {
+        console.log("Message received. ", payload);
+        const notificationTitle = payload.notification.title;
+        const notificationOptions = {
+          body: payload.notification.body,
+          icon: payload.notification.icon,
+        };
+
+        new Notification(notificationTitle, notificationOptions);
+      });
     }
-    return outputArray;
-  }
 
-  function subscribeUserToPush(swReg: any) {
-    const applicationServerKey = urlB64ToUint8Array(
-      "BDJaEIQxolpNE3E55NUSYaQPvXQ3xL7zSxRAh-ht4Z8F3sQsOc_KvrexPdhqLRzlJaVNJ9nsNvT15HY6doxzPlo"
-    );
+    function urlB64ToUint8Array(base64String) {
+      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, "+")
+        .replace(/_/g, "/");
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
 
-    console.log("=====>app server key", applicationServerKey);
-    swReg.pushManager
-      .subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: applicationServerKey,
-      })
-      .then(function (subscription: any) {
-        console.log("User is subscribed:", subscription);
+    function subscribeUserToPush(swReg) {
+      const applicationServerKey = urlB64ToUint8Array(
+        "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk"
+      );
 
-        // Send subscription to your server
-        sendSubscriptionToServer(subscription);
-      })
-      .catch(function (error: any) {
-        console.error("Failed to subscribe the user: ", error);
-      });
-  }
-
-  function sendSubscriptionToServer(subscription: any) {
-    // Add user identification data (e.g., user ID or email)
-    const userSubscription = {
-      userId: JSON.parse(localStorage.getItem("insights-profile-id") || ""),
-      subscription: subscription,
-    };
-
-    return fetch("http://127.0.0.1:8000/subscribe", {
-      method: "POST",
-      body: JSON.stringify(userSubscription),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
-
-  function handleSendNotifications() {
-    const payload = {
-      title: "Hello!",
-      body: "You have a new notification.",
-      icon: "",
-    };
-    fetch("http://127.0.0.1:8000/send_notification", {
-      method: "POST",
-      body: JSON.stringify({
-        userId: JSON.parse(localStorage.getItem("insights-profile-id") || ""),
-        payload,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
+      swReg.pushManager
+        .subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey,
+        })
+        .then((subscription) => {
+          console.log("User is subscribed:", subscription);
+          // Optionally, send subscription to server
+          // sendSubscriptionToServer(subscription);
+        })
+        .catch((error) => {
+          console.error("Failed to subscribe the user: ", error);
+        });
+    }
+  }, []);
 
   return (
     <Provider>
       <Router>
         <Container>
-          <button
-            type="button"
-            onClick={() => handleSendNotifications()}
-            className="bg-gray-50 p-4 border border-[#e8e8e8] rounded-lg m-4 font-bold cursor-pointer"
-          >
-            Send Notification
-          </button>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products/:id" element={<Product />} />

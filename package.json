@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.10.6",
     "@loadable/component": "^5.15.3",
     "@mui/material": "^5.12.1",
+    "firebase": "^10.12.4",
     "focus-visible": "^5.2.0",
     "formik": "^2.2.9",
     "framer-motion": "^10.12.4",
