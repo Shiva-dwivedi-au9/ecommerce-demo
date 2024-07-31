@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import loadable from "@loadable/component";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Container from "./components/Container";
@@ -55,7 +55,6 @@ const App = () => {
             if (permission === "granted") {
               console.log("Notification permission granted.");
               subscribeUserToPush(registration);
-              console.log("===>register", registration);
               getToken(messaging, {
                 vapidKey:
                   "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk",
@@ -64,7 +63,6 @@ const App = () => {
                 .then((currentToken) => {
                   if (currentToken) {
                     console.log("FCM Token:", currentToken);
-                    // Send the token to your server and update the UI if necessary
                     sendTokenToServer(currentToken);
                   } else {
                     console.log(
@@ -87,17 +85,17 @@ const App = () => {
 
       onMessage(messaging, (payload) => {
         console.log("Message received. ", payload);
-        const notificationTitle = payload.notification.title;
+        const { title, body, icon } = payload.notification || {};
         const notificationOptions = {
-          body: payload.notification.body,
-          icon: payload.notification.icon,
+          body,
+          icon,
         };
 
-        new Notification(notificationTitle, notificationOptions);
+        new Notification(title || "", notificationOptions);
       });
     }
 
-    function urlB64ToUint8Array(base64String) {
+    function urlB64ToUint8Array(base64String: any) {
       const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
       const base64 = (base64String + padding)
         .replace(/\-/g, "+")
@@ -110,7 +108,7 @@ const App = () => {
       return outputArray;
     }
 
-    function subscribeUserToPush(swReg) {
+    function subscribeUserToPush(swReg: any) {
       const applicationServerKey = urlB64ToUint8Array(
         "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk"
       );
@@ -120,30 +118,28 @@ const App = () => {
           userVisibleOnly: true,
           applicationServerKey: applicationServerKey,
         })
-        .then((subscription) => {
+        .then((subscription: any) => {
           console.log("User is subscribed:", subscription);
           // Optionally, send subscription to server
           // sendSubscriptionToServer(subscription);
         })
-        .catch((error) => {
+        .catch((error: any) => {
           console.error("Failed to subscribe the user: ", error);
         });
     }
-    function sendTokenToServer(token: any) {
-      // Add user identification data (e.g., user ID or email)
-      const date = new Date();
 
+    function sendTokenToServer(token: any) {
       const userSubscription = {
         profile_id: JSON.parse(
-          localStorage.getItem("insights-profile-id") || ""
+          localStorage.getItem("insights-profile-id") || "null"
         ),
         fcm_token: token,
-        timestamp: Math.floor(date.getTime() / 1000),
+        timestamp: Math.floor(Date.now() / 1000),
         platform: "web",
         domain: window.location.hostname,
       };
 
-      return fetch("https://dev-insights-api.rebid.co/v1/app/token", {
+      fetch("https://dev-insights-api.rebid.co/v1/app/token", {
         method: "POST",
         body: JSON.stringify(userSubscription),
         headers: {
