@@ -91,6 +91,18 @@ const App = () => {
           return;
         }
 
+        let actions = [];
+        if (payload?.data?.actions) {
+          try {
+            actions =
+              typeof payload.data.actions === "string"
+                ? JSON.parse(payload.data.actions)
+                : payload.data.actions;
+          } catch (e) {
+            console.error("Failed to parse actions:", e);
+          }
+        }
+
         const title = payload.notification.title;
         const notificationOptions = {
           body: payload.notification.body,
@@ -101,8 +113,8 @@ const App = () => {
             notification_id: payload?.data?.notification_id,
             actions: payload?.data?.actions,
           },
-          actions: payload?.data?.actions
-            ? payload.data.actions?.map((action: any) => ({
+          actions: actions
+            ? actions?.map((action: any) => ({
                 action: action.action,
                 title: action.title,
                 icon: action.icon,
