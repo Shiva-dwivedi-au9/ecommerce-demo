@@ -168,10 +168,10 @@ const App = () => {
         timestamp: Math.floor(Date.now() / 1000),
         platform: "web",
         domain: window.location.hostname,
-        source_id: "6c3c3da7-c890-4d2d-8847-f91a20e8eedc",
+        source_id: "03e31861-b2ad-48c5-9948-023c03a9c571",
       };
 
-      fetch("https://dev-insights-api.rebid.co/v1/app/token", {
+      fetch("https://qa-insights-api.rebid.co/v1/app/token", {
         method: "POST",
         body: JSON.stringify(userSubscription),
         headers: {
