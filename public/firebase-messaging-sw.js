@@ -83,7 +83,7 @@ self.addEventListener('notificationclick', function (event) {
 
     // Handle action clicks
     if (action) {
-        const actionItem = notificationData.actions.find(item => item.action === action);
+        const actionItem = notificationData.notification.actions.find(item => item.action === action);
         if (actionItem && actionItem.url) {
             const url = trackUrl + '&c=true' + `&b=${actionItem.action}`
             // Make the tracking request
