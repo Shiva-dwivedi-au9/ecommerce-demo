@@ -45,15 +45,16 @@ messaging.onBackgroundMessage((payload) => {
         data: {
             url: payload.data.url,
             notification_id: payload.data.notification_id,
-            actions: payload.data.actions
+            actions: payload.notification.actions,
+            track_url: payload.data.track_url
         },
-        actions: payload.data.actions ? payload.data.actions.map(action => ({
+        actions: payload.notification.actions ? payload.notification.actions.map(action => ({
             action: action.action,
             title: action.title,
-            icon: action.icon
+            icon: action.icon,
         })) : []
     };
-
+    console.log("========>notification options", payload.notification.actions)
     self.registration.showNotification(notificationTitle, notificationOptions);
 
     // Handle auto-close
@@ -68,12 +69,12 @@ messaging.onBackgroundMessage((payload) => {
 
 // Listen for notification click events
 self.addEventListener('notificationclick', function (event) {
+
     event.notification.close();
 
     const action = event.action;
-    const notificationData = event.notification.data;
 
-    const trackUrl = event.data.track_url;
+    const trackUrl = event.notification.data.track_url;
 
     const url = trackUrl + '&c=true' + '&b=default'
     // Make the tracking request
@@ -83,14 +84,14 @@ self.addEventListener('notificationclick', function (event) {
 
     // Handle action clicks
     if (action) {
-        const actionItem = notificationData.notification.actions.find(item => item.action === action);
-        if (actionItem && actionItem.url) {
+        const actionItem = event.notification.actions.find(item => item.action === action);
+        if (actionItem && actionItem.action) {
             const url = trackUrl + '&c=true' + `&b=${actionItem.action}`
             // Make the tracking request
             if (trackUrl) {
                 sendTrackingRequest(url);
             }
-            clients.openWindow(actionItem.url);
+            clients.openWindow(actionItem.action);
         }
     } else {
         // Default click action
