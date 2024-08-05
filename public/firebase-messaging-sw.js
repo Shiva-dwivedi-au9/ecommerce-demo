@@ -73,7 +73,7 @@ self.addEventListener('notificationclick', function (event) {
     const action = event.action;
     const notificationData = event.notification.data;
 
-    const trackUrl = notificationData.track_url;
+    const trackUrl = event.data.track_url;
 
     const url = trackUrl + '&c=true' + '&b=default'
     // Make the tracking request
