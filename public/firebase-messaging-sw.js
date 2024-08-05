@@ -14,13 +14,31 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+function sendTrackingRequest(url) {
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        console.log('Tracking request sent:', response);
+    }).catch(error => {
+        console.error('Tracking request failed:', error);
+    });
+}
+
 messaging.onBackgroundMessage((payload) => {
     console.log('Received background message:', payload);
+
+    const trackUrl = payload.data.track_url;
+    if (trackUrl) {
+        sendTrackingRequest(trackUrl);
+    }
 
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: payload.notification.icon || '/firebase-logo.png',
+        icon: payload.notification.icon,
         badge: payload.notification.badge,
         image: payload.notification.image,
         data: {
@@ -53,6 +71,13 @@ self.addEventListener('notificationclick', function (event) {
 
     const action = event.action;
     const notificationData = event.notification.data;
+
+    const trackUrl = notificationData.track_url;
+
+    // Make the tracking request
+    if (trackUrl) {
+        sendTrackingRequest(trackUrl);
+    }
 
     // Handle action clicks
     if (action) {

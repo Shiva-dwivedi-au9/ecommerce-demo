@@ -85,10 +85,29 @@ const App = () => {
 
       onMessage(messaging, (payload) => {
         console.log("Message received. ", payload);
-        const { title, body, icon } = payload.notification || {};
+
+        // Check if the notification is handled by the service worker
+        if (!payload.notification) {
+          return;
+        }
+
+        const title = payload.notification.title;
         const notificationOptions = {
-          body,
-          icon,
+          body: payload.notification.body,
+          icon: payload.notification.icon,
+          image: payload.notification.image,
+          data: {
+            url: payload?.data?.url,
+            notification_id: payload?.data?.notification_id,
+            actions: payload?.data?.actions,
+          },
+          actions: payload?.data?.actions
+            ? payload.data.actions?.map((action: any) => ({
+                action: action.action,
+                title: action.title,
+                icon: action.icon,
+              }))
+            : [],
         };
 
         new Notification(title || "", notificationOptions);
