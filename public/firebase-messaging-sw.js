@@ -16,9 +16,9 @@ const messaging = firebase.messaging();
 
 function sendTrackingRequest(url) {
     fetch(url, {
-        method: 'POST',
+        method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            mode: 'no-cors'
         }
     }).then(response => {
         console.log('Tracking request sent:', response);
@@ -32,7 +32,8 @@ messaging.onBackgroundMessage((payload) => {
 
     const trackUrl = payload.data.track_url;
     if (trackUrl) {
-        sendTrackingRequest(trackUrl);
+        const url = trackUrl + '&i=true'
+        sendTrackingRequest(url);
     }
 
     const notificationTitle = payload.notification.title;
@@ -74,15 +75,21 @@ self.addEventListener('notificationclick', function (event) {
 
     const trackUrl = notificationData.track_url;
 
+    const url = trackUrl + '&c=true' + '&b=default'
     // Make the tracking request
     if (trackUrl) {
-        sendTrackingRequest(trackUrl);
+        sendTrackingRequest(url);
     }
 
     // Handle action clicks
     if (action) {
         const actionItem = notificationData.actions.find(item => item.action === action);
         if (actionItem && actionItem.url) {
+            const url = trackUrl + '&c=true' + `&b=${actionItem.action}`
+            // Make the tracking request
+            if (trackUrl) {
+                sendTrackingRequest(url);
+            }
             clients.openWindow(actionItem.url);
         }
     } else {
