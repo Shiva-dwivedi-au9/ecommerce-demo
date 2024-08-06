@@ -54,7 +54,7 @@ const App = () => {
           Notification.requestPermission().then((permission) => {
             if (permission === "granted") {
               console.log("Notification permission granted.");
-              subscribeUserToPush(registration);
+              // subscribeUserToPush(registration);
               getToken(messaging, {
                 vapidKey:
                   "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk",
@@ -83,47 +83,49 @@ const App = () => {
           console.error("Service Worker Error", error);
         });
 
-      onMessage(messaging, (payload) => {
-        console.log("Message received. ", payload);
+      // onMessage(messaging, (payload) => {
+      //   console.log("Message received. ", payload);
 
-        // Check if the notification is handled by the service worker
-        if (!payload.notification) {
-          return;
-        }
+      //   // Check if the notification is handled by the service worker
+      //   if (!payload.notification) {
+      //     return;
+      //   }
 
-        let actions = [];
-        if (payload?.data?.actions) {
-          try {
-            actions =
-              typeof payload.data.actions === "string"
-                ? JSON.parse(payload.data.actions)
-                : payload.data.actions;
-          } catch (e) {
-            console.error("Failed to parse actions:", e);
-          }
-        }
+      //   let actions = [];
+      //   if (payload?.data?.actions) {
+      //     try {
+      //       actions =
+      //         typeof payload.data.actions === "string"
+      //           ? JSON.parse(payload.data.actions)
+      //           : payload.data.actions;
+      //     } catch (e) {
+      //       console.error("Failed to parse actions:", e);
+      //     }
+      //   }
 
-        const title = payload.notification.title;
-        const notificationOptions = {
-          body: payload.notification.body,
-          icon: payload.notification.icon,
-          image: payload.notification.image,
-          data: {
-            url: payload?.data?.url,
-            notification_id: payload?.data?.notification_id,
-            actions: payload?.data?.actions,
-          },
-          actions: actions
-            ? actions?.map((action: any) => ({
-                action: action.action,
-                title: action.title,
-                icon: action.icon,
-              }))
-            : [],
-        };
-
-        new Notification(title || "", notificationOptions);
-      });
+      //   const title = payload.notification.title;
+      //   const notificationOptions = {
+      //     // body: payload.notification.body,
+      //     // icon: payload.notification.icon,
+      //     // image: payload.notification.image,
+      //     data: {
+      //       url: payload?.data?.url,
+      //       notification_id: payload?.data?.notification_id,
+      //       actions: payload?.data?.actions,
+      //       image: payload.notification.image,
+      //       icon: payload.notification.image,
+      //     },
+      //     // actions: actions
+      //     //   ? actions?.map((action: any) => ({
+      //     //       action: action.action,
+      //     //       title: action.title,
+      //     //       icon: action.icon,
+      //     //     }))
+      //     //   : [],
+      //   };
+      //   console.log("======>notification options", notificationOptions);
+      //   new Notification(title || "", notificationOptions);
+      // });
     }
 
     function urlB64ToUint8Array(base64String: any) {
@@ -139,25 +141,25 @@ const App = () => {
       return outputArray;
     }
 
-    function subscribeUserToPush(swReg: any) {
-      const applicationServerKey = urlB64ToUint8Array(
-        "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk"
-      );
+    // function subscribeUserToPush(swReg: any) {
+    //   const applicationServerKey = urlB64ToUint8Array(
+    //     "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk"
+    //   );
 
-      swReg.pushManager
-        .subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: applicationServerKey,
-        })
-        .then((subscription: any) => {
-          console.log("User is subscribed:", subscription);
-          // Optionally, send subscription to server
-          // sendSubscriptionToServer(subscription);
-        })
-        .catch((error: any) => {
-          console.error("Failed to subscribe the user: ", error);
-        });
-    }
+    //   swReg.pushManager
+    //     .subscribe({
+    //       userVisibleOnly: true,
+    //       applicationServerKey: applicationServerKey,
+    //     })
+    //     .then((subscription: any) => {
+    //       console.log("User is subscribed:", subscription);
+    //       // Optionally, send subscription to server
+    //       // sendSubscriptionToServer(subscription);
+    //     })
+    //     .catch((error: any) => {
+    //       console.error("Failed to subscribe the user: ", error);
+    //     });
+    // }
 
     function sendTokenToServer(token: any) {
       const userSubscription = {
