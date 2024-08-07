@@ -53,8 +53,6 @@ const App = () => {
 
           Notification.requestPermission().then((permission) => {
             if (permission === "granted") {
-              console.log("Notification permission granted.");
-              // subscribeUserToPush(registration);
               getToken(messaging, {
                 vapidKey:
                   "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk",
@@ -62,12 +60,8 @@ const App = () => {
               })
                 .then((currentToken) => {
                   if (currentToken) {
-                    console.log("FCM Token:", currentToken);
                     sendTokenToServer(currentToken);
                   } else {
-                    console.log(
-                      "No registration token available. Request permission to generate one."
-                    );
                   }
                 })
                 .catch((err) => {
@@ -82,84 +76,7 @@ const App = () => {
         .catch((error) => {
           console.error("Service Worker Error", error);
         });
-
-      // onMessage(messaging, (payload) => {
-      //   console.log("Message received. ", payload);
-
-      //   // Check if the notification is handled by the service worker
-      //   if (!payload.notification) {
-      //     return;
-      //   }
-
-      //   let actions = [];
-      //   if (payload?.data?.actions) {
-      //     try {
-      //       actions =
-      //         typeof payload.data.actions === "string"
-      //           ? JSON.parse(payload.data.actions)
-      //           : payload.data.actions;
-      //     } catch (e) {
-      //       console.error("Failed to parse actions:", e);
-      //     }
-      //   }
-
-      //   const title = payload.notification.title;
-      //   const notificationOptions = {
-      //     // body: payload.notification.body,
-      //     // icon: payload.notification.icon,
-      //     // image: payload.notification.image,
-      //     data: {
-      //       url: payload?.data?.url,
-      //       notification_id: payload?.data?.notification_id,
-      //       actions: payload?.data?.actions,
-      //       image: payload.notification.image,
-      //       icon: payload.notification.image,
-      //     },
-      //     // actions: actions
-      //     //   ? actions?.map((action: any) => ({
-      //     //       action: action.action,
-      //     //       title: action.title,
-      //     //       icon: action.icon,
-      //     //     }))
-      //     //   : [],
-      //   };
-      //   console.log("======>notification options", notificationOptions);
-      //   new Notification(title || "", notificationOptions);
-      // });
     }
-
-    // function urlB64ToUint8Array(base64String: any) {
-    //   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    //   const base64 = (base64String + padding)
-    //     .replace(/\-/g, "+")
-    //     .replace(/_/g, "/");
-    //   const rawData = window.atob(base64);
-    //   const outputArray = new Uint8Array(rawData.length);
-    //   for (let i = 0; i < rawData.length; ++i) {
-    //     outputArray[i] = rawData.charCodeAt(i);
-    //   }
-    //   return outputArray;
-    // }
-
-    // function subscribeUserToPush(swReg: any) {
-    //   const applicationServerKey = urlB64ToUint8Array(
-    //     "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk"
-    //   );
-
-    //   swReg.pushManager
-    //     .subscribe({
-    //       userVisibleOnly: true,
-    //       applicationServerKey: applicationServerKey,
-    //     })
-    //     .then((subscription: any) => {
-    //       console.log("User is subscribed:", subscription);
-    //       // Optionally, send subscription to server
-    //       // sendSubscriptionToServer(subscription);
-    //     })
-    //     .catch((error: any) => {
-    //       console.error("Failed to subscribe the user: ", error);
-    //     });
-    // }
 
     function sendTokenToServer(token: any) {
       const userSubscription = {

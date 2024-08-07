@@ -1,31 +1,105 @@
-// importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js');
-// importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js');
+function sendTrackingRequest(url) {
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            mode: 'no-cors'
+        }
+    }).then(response => {
+    }).catch(error => {
+    });
+}
 
-// // Initialize Firebase in the service worker
-// firebase.initializeApp({
-//     apiKey: "AIzaSyB6-_MaO3hpFt0tD1C5IqeLnpKWpalDTx4",
-//     authDomain: "nonprod-64586.firebaseapp.com",
-//     projectId: "nonprod-64586",
-//     storageBucket: "nonprod-64586.appspot.com",
-//     messagingSenderId: "449251706684",
-//     appId: "1:449251706684:web:231d21f65d2980501b4039",
-//     measurementId: "G-XSSJE9P2TF"
-// });
+self.addEventListener('push', (event) => {
+    if (event.data) {
+        const payload = event.data.json();
 
-// const messaging = firebase.messaging();
+        const trackUrl = payload.data.track_url;
 
-// function sendTrackingRequest(url) {
-//     fetch(url, {
-//         method: 'GET',
-//         headers: {
-//             mode: 'no-cors'
-//         }
-//     }).then(response => {
-//         console.log('Tracking request sent:', response);
-//     }).catch(error => {
-//         console.error('Tracking request failed:', error);
-//     });
-// }
+        const title = payload.notification?.title || 'Default Title';
+        const options = {
+            body: payload.notification?.body || 'Default Body',
+            icon: payload.notification?.icon ? payload?.notification?.icon : payload.notification?.image || null,
+            image: payload.notification?.image || '/default-image.png',
+            data: {
+                url: payload.data?.url || '/',
+                notification_id: payload.data?.notification_id,
+                actions: payload.notification?.actions ? payload.notification.actions : [],
+                trackUrl
+            },
+            actions: payload.notification?.actions ? payload.notification.actions.map(action => ({
+                action: action.action,
+                title: action.title,
+                icon: action.icon,
+            })) : [],
+        };
+        event.waitUntil(
+            self.registration.showNotification(title, options)
+        );
+        if (trackUrl) {
+            const url = trackUrl + '&i=true'
+            sendTrackingRequest(url);
+        }
+    } else {
+        console.log('Push event but no data');
+    }
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    const notificationData = event.notification.data;
+    let urlToOpen = notificationData.url;
+    let actionItem = { action: 'default' }; // Default action if user clicks on notification body
+    let trackUrl = notificationData.trackUrl;
+
+    // Check if an action was clicked and get the action URL if available
+    if (event.action && notificationData.actions) {
+        actionItem = notificationData.actions.find(action => action.action === event.action) || actionItem;
+        if (actionItem.url) {
+            urlToOpen = actionItem.url;
+        }
+    }
+
+    const trackingUrl = trackUrl + '&c=true' + `&a=${actionItem.action}`;
+
+    // Send the tracking request
+    if (trackUrl) {
+        sendTrackingRequest(trackingUrl);
+    }
+
+    event.waitUntil(
+        clients.matchAll({
+            type: 'window',
+            includeUncontrolled: true
+        }).then((windowClients) => {
+            let matchingClient = null;
+
+            for (let client of windowClients) {
+                if (client.url === urlToOpen) {
+                    matchingClient = client;
+                    break;
+                }
+            }
+            if (matchingClient) {
+                return matchingClient.focus();
+            } else {
+                return clients.openWindow(urlToOpen);
+            }
+        }).catch((error) => {
+            console.error('Error during notification click handling:', error);
+            return clients.openWindow(urlToOpen);
+        })
+    );
+});
+
+
+
+
+
+
+
+
+
 
 // // messaging.onBackgroundMessage((payload) => {
 // //     console.log('======>Received background message:', payload);
@@ -105,53 +179,4 @@
 // //     // Optional: Handle notification close event if needed
 // // });
 
-self.addEventListener('push', (event) => {
-    if (event.data) {
-        const payload = event.data.json();
-        const title = payload.notification?.title || 'Default Title';
-        const options = {
-            body: payload.notification?.body || 'Default Body',
-            icon: payload.notification?.image || '/default-icon.png',
-            image: payload.notification?.image || '/default-image.png',
-            data: {
-                url: payload.data?.url || '/',
-                notification_id: payload.data?.notification_id,
-                actions: payload.data?.actions ? JSON.parse(payload.data.actions) : [],
-            },
-            actions: payload.data?.actions ? JSON.parse(payload.data.actions).map(action => ({
-                action: action.action,
-                title: action.title,
-                icon: action.icon,
-            })) : [],
-        };
-        console.log('======> Push event received:', options);
-        event.waitUntil(
-            self.registration.showNotification(title, options)
-        );
-    } else {
-        console.log('Push event but no data');
-    }
-});
 
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-
-    const notificationData = event.notification.data;
-    const urlToOpen = notificationData.url;
-
-    event.waitUntil(
-        clients.matchAll({
-            type: 'window',
-            includeUncontrolled: true
-        }).then((windowClients) => {
-            for (let client of windowClients) {
-                if (client.url === urlToOpen && 'focus' in client) {
-                    return client.focus();
-                }
-            }
-            if (clients.openWindow) {
-                return clients.openWindow(urlToOpen);
-            }
-        })
-    );
-});
