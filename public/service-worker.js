@@ -48,8 +48,8 @@ self.addEventListener('notificationclick', (event) => {
     // Check if an action was clicked and get the action URL if available
     if (event.action && notificationData.actions) {
         actionItem = notificationData.actions.find(action => action.action === event.action) || actionItem;
-        if (actionItem.url) {
-            urlToOpen = actionItem.url;
+        if (actionItem.action) {
+            urlToOpen = actionItem.action;
         }
     }
 
