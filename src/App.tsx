@@ -44,7 +44,7 @@ const App = () => {
 
     if ("Notification" in window && "serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register("/service-worker.js")
+        .register("/firebase-messaging-sw.js")
         .then((registration) => {
           console.log(
             "Service Worker registered with scope:",
