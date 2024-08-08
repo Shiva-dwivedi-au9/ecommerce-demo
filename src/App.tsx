@@ -53,6 +53,7 @@ const App = () => {
 
           Notification.requestPermission().then((permission) => {
             if (permission === "granted") {
+              subscribeUserToPush(registration);
               getToken(messaging, {
                 vapidKey:
                   "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk",
@@ -75,6 +76,36 @@ const App = () => {
         })
         .catch((error) => {
           console.error("Service Worker Error", error);
+        });
+    }
+
+    function urlB64ToUint8Array(base64String: any) {
+      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, "+")
+        .replace(/_/g, "/");
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    function subscribeUserToPush(swReg: any) {
+      const applicationServerKey = urlB64ToUint8Array(
+        "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk"
+      );
+      swReg.pushManager
+        .subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey,
+        })
+        .then(function (subscription: any) {
+          console.log("User is subscribed:", subscription);
+        })
+        .catch(function (error: any) {
+          console.error("Failed to subscribe the user: ", error);
         });
     }
 
