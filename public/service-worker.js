@@ -53,7 +53,7 @@ self.addEventListener('notificationclick', (event) => {
         }
     }
 
-    const trackingUrl = trackUrl + '&c=true' + `&a=${actionItem.action}`;
+    const trackingUrl = `${trackUrl}&c=true&a=${actionItem.action}`;
 
     // Send the tracking request
     if (trackUrl) {
@@ -68,17 +68,19 @@ self.addEventListener('notificationclick', (event) => {
             let matchingClient = null;
 
             for (let client of windowClients) {
-                if (client.url === urlToOpen) {
+                if (new URL(client.url).href === new URL(urlToOpen).href) {
                     matchingClient = client;
                     break;
                 }
             }
+
             if (matchingClient) {
                 return matchingClient.focus();
             } else if (clients.openWindow) {
                 return clients.openWindow(urlToOpen);
             }
         }).catch((error) => {
+            console.error('Error matching clients:', error);
             if (clients.openWindow) {
                 return clients.openWindow(urlToOpen);
             }
@@ -89,10 +91,9 @@ self.addEventListener('notificationclick', (event) => {
 function sendTrackingRequest(url) {
     fetch(url, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
+        mode: 'no-cors'
+    }).catch((error) => {
+        console.error('Error sending tracking request:', error);
     });
 }
 
