@@ -6,7 +6,7 @@ import ProgressLine from "./components/Loading/ProgressLine";
 import { Provider } from "./context/GlobalState";
 import Saved from "./pages/Saved";
 import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { getMessaging, getToken } from "firebase/messaging";
 
 const Home = loadable(() => import("./pages/Home"), {
   fallback: <ProgressLine />,
@@ -44,7 +44,7 @@ const App = () => {
 
     if ("Notification" in window && "serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register("/firebase-messaging-sw.js")
+        .register("/service-worker.js")
         .then((registration) => {
           console.log(
             "Service Worker registered with scope:",
@@ -53,7 +53,6 @@ const App = () => {
 
           Notification.requestPermission().then((permission) => {
             if (permission === "granted") {
-              console.log("Notification permission granted.");
               subscribeUserToPush(registration);
               getToken(messaging, {
                 vapidKey:
@@ -62,12 +61,8 @@ const App = () => {
               })
                 .then((currentToken) => {
                   if (currentToken) {
-                    console.log("FCM Token:", currentToken);
                     sendTokenToServer(currentToken);
                   } else {
-                    console.log(
-                      "No registration token available. Request permission to generate one."
-                    );
                   }
                 })
                 .catch((err) => {
@@ -82,48 +77,6 @@ const App = () => {
         .catch((error) => {
           console.error("Service Worker Error", error);
         });
-
-      onMessage(messaging, (payload) => {
-        console.log("Message received. ", payload);
-
-        // Check if the notification is handled by the service worker
-        if (!payload.notification) {
-          return;
-        }
-
-        let actions = [];
-        if (payload?.data?.actions) {
-          try {
-            actions =
-              typeof payload.data.actions === "string"
-                ? JSON.parse(payload.data.actions)
-                : payload.data.actions;
-          } catch (e) {
-            console.error("Failed to parse actions:", e);
-          }
-        }
-
-        const title = payload.notification.title;
-        const notificationOptions = {
-          body: payload.notification.body,
-          icon: payload.notification.icon,
-          image: payload.notification.image,
-          data: {
-            url: payload?.data?.url,
-            notification_id: payload?.data?.notification_id,
-            actions: payload?.data?.actions,
-          },
-          actions: actions
-            ? actions?.map((action: any) => ({
-                action: action.action,
-                title: action.title,
-                icon: action.icon,
-              }))
-            : [],
-        };
-
-        new Notification(title || "", notificationOptions);
-      });
     }
 
     function urlB64ToUint8Array(base64String: any) {
@@ -143,18 +96,15 @@ const App = () => {
       const applicationServerKey = urlB64ToUint8Array(
         "BEkRVWXnOfCOQfwzfu1woNci0XWjPsc_c5YifU8buSTa8-udwV9PMGtBJLd1CT35CkHUWUM36TRWt1iUdfomIvk"
       );
-
       swReg.pushManager
         .subscribe({
           userVisibleOnly: true,
           applicationServerKey: applicationServerKey,
         })
-        .then((subscription: any) => {
+        .then(function (subscription: any) {
           console.log("User is subscribed:", subscription);
-          // Optionally, send subscription to server
-          // sendSubscriptionToServer(subscription);
         })
-        .catch((error: any) => {
+        .catch(function (error: any) {
           console.error("Failed to subscribe the user: ", error);
         });
     }
